@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoasOndas - Informações de Ondas no Rio de Janeiro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-blue-50">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-blue-800 text-center">BoasOndas</h1>
+            <p class="text-xl text-blue-600 text-center">Informações de Ondas no Rio de Janeiro</p>
+        </header>
+
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold text-blue-700 mb-4">Selecione um Bairro</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" 
+                 hx-get="/bairros" 
+                 hx-trigger="load" 
+                 hx-swap="innerHTML"
+                 hx-headers='{"Accept": "text/html"}'>
+            </div>
+        </div>
+
+        <div id="wave-info" class="mt-8">
+            <h2 class="text-2xl font-semibold text-blue-700 mb-4">Informações de Ondas</h2>
+            <p class="text-gray-600">Selecione um bairro para ver as informações de ondas.</p>
+        </div>
+    </div>
+</body>
+</html>

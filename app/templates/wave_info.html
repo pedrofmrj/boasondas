@@ -1,0 +1,54 @@
+<h2 class="text-2xl font-semibold text-blue-700 mb-4">Informações de Ondas em {{ wave_info.bairro }}</h2>
+
+<div class="bg-white rounded-lg shadow-lg p-6 wave-card">
+    <div class="flex flex-col md:flex-row">
+        <div class="w-full md:w-1/3 mb-4 md:mb-0">
+            <div class="wave-height-indicator" style="--wave-height: {{ wave_info.altura_onda * 20 }}%;">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-500 to-blue-300" 
+                     style="height: {{ wave_info.altura_onda * 20 }}%; max-height: 100%;"></div>
+                </div>
+                <div class="absolute inset-x-0 bottom-0 h-2 bg-blue-600 wave-animation"></div>
+                <div class="absolute inset-x-0 bottom-1 h-1 bg-blue-400 wave-animation" style="animation-delay: -2s;"></div>
+            </div>
+            <p class="text-center mt-2 text-3xl font-bold text-blue-800">{{ wave_info.altura_onda }}m</p>
+            <p class="text-center text-blue-600">Altura da Onda</p>
+        </div>
+        
+        <div class="w-full md:w-2/3 pl-0 md:pl-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <p class="text-sm text-blue-500">Direção</p>
+                    <p class="text-xl font-semibold">{{ wave_info.direcao }}</p>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <p class="text-sm text-blue-500">Período</p>
+                    <p class="text-xl font-semibold">{{ wave_info.periodo }}s</p>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <p class="text-sm text-blue-500">Temperatura da Água</p>
+                    <p class="text-xl font-semibold">{{ wave_info.temperatura_agua }}°C</p>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <p class="text-sm text-blue-500">Vento</p>
+                    <p class="text-xl font-semibold">{{ wave_info.vento_velocidade }} km/h</p>
+                    <p class="text-sm">{{ wave_info.vento_direcao }}</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-right">
+                <p class="text-sm text-gray-500">Atualizado em: {{ wave_info.timestamp.strftime('%d/%m/%Y %H:%M') }}</p>
+                <p class="text-xs text-gray-400">Fonte: {{ wave_info.fonte }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            hx-get="/ondas/{{ wave_info.bairro }}"
+            hx-target="#wave-info"
+            hx-swap="innerHTML"
+            hx-trigger="click">
+        Atualizar Dados
+    </button>
+</div>

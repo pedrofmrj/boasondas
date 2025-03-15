@@ -1,0 +1,37 @@
+/* Custom styles beyond Tailwind */
+.wave-card {
+    transition: all 0.3s ease;
+}
+
+.wave-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.wave-height-indicator {
+    height: 100px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+}
+
+.wave-height-indicator::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, #3b82f6, #93c5fd);
+    transition: height 0.5s ease;
+}
+
+/* Wave animation */
+@keyframes wave {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(-25%); }
+    100% { transform: translateX(0); }
+}
+
+.wave-animation {
+    animation: wave 8s infinite ease-in-out;
+}
