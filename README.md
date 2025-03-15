@@ -68,7 +68,12 @@ The API includes fallback mechanisms:
 4. Push to the branch
 5. Create a new Pull Request
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0) - see the LICENSE file for details. This license ensures that:
+
+- The software is free to use, modify, and distribute
+- Modified versions must also be open source
+- Changes made to the code must be documented
+- The complete source code must be made available
 ## Technologies
 - FastAPI
 - HTMX
