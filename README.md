@@ -36,6 +36,39 @@ python app/main.py
 - /bairros - List of available beaches
 - /ondas/{bairro} - Wave information for a specific beach
 - /ondas - Wave information for all beaches
+### Response Format
+Example response for wave information:
+
+```json
+{
+    "bairro": "Copacabana",
+    "altura_onda": 1.5,
+    "direcao": "Sudeste",
+    "periodo": 8.5,
+    "temperatura_agua": 22.5,
+    "vento_velocidade": 15.2,
+    "vento_direcao": "Leste",
+    "timestamp": "2023-11-15T14:30:00",
+    "fonte": "OpenWeatherMap"
+}
+ ```
+ ## Error Handling
+The API includes fallback mechanisms:
+
+1. Tries OpenWeatherMap API first
+2. Falls back to Stormglass API if OpenWeatherMap fails
+3. Uses simulated data if both APIs are unavailable
+## Cache System
+- Wave information is cached for 1 hour to reduce API calls
+- Cache is stored in memory and resets when the server restarts
+## Contributing
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
+## License
+This project is licensed under the MIT License - see the LICENSE file for details
 ## Technologies
 - FastAPI
 - HTMX
