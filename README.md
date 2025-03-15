@@ -1,11 +1,20 @@
-# BoasOndas API
+# BoasOndas
 
-API para coleta de informações de ondas nos bairros do Rio de Janeiro.
+Wave information API for Rio de Janeiro beaches. This application provides real-time wave and weather data for various beaches in Rio de Janeiro.
 
-## Instalação
+## Features
 
-1. Clone o repositório
-2. Instale as dependências:
+- Real-time wave height information
+- Wind speed and direction
+- Water temperature
+- Wave period and direction
+- Support for multiple beaches in Rio de Janeiro
+- HTMX-powered frontend with Tailwind CSS
 
-```bash
+## Setup
+
+1. Clone the repository
+2. Install dependencies:
+
+```python
 pip install -r requirements.txt
