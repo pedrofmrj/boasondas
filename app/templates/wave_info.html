@@ -1,54 +1,85 @@
-<h2 class="text-2xl font-semibold text-blue-700 mb-4">Informações de Ondas em {{ wave_info.bairro }}</h2>
+<div class="p-6 bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-lg">
+    <h2 class="text-3xl font-bold text-blue-800 mb-6 flex items-center">
+        <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M21.25 12c0 .5-.34.91-.84.91H2.59c-.5 0-.84-.41-.84-.91s.34-.91.84-.91h17.82c.5 0 .84.41.84.91zm-4.25-4c0 .5-.34.91-.84.91H2.59c-.5 0-.84-.41-.84-.91s.34-.91.84-.91h13.57c.5 0 .84.41.84.91zm4.25 8c0 .5-.34.91-.84.91H2.59c-.5 0-.84-.41-.84-.91s.34-.91.84-.91h17.82c.5 0 .84.41.84.91z"/>
+        </svg>
+        {{ wave_info.bairro }}
+    </h2>
 
-<div class="bg-white rounded-lg shadow-lg p-6 wave-card">
-    <div class="flex flex-col md:flex-row">
-        <div class="w-full md:w-1/3 mb-4 md:mb-0">
-            <div class="wave-height-indicator" style="--wave-height: {{ wave_info.altura_onda * 20 }}%;">
-                <div class="absolute inset-0 bg-gradient-to-t from-blue-500 to-blue-300" 
-                     style="height: {{ wave_info.altura_onda * 20 }}%; max-height: 100%;"></div>
-                </div>
-                <div class="absolute inset-x-0 bottom-0 h-2 bg-blue-600 wave-animation"></div>
-                <div class="absolute inset-x-0 bottom-1 h-1 bg-blue-400 wave-animation" style="animation-delay: -2s;"></div>
+    <div class="flex flex-col md:flex-row gap-6">
+        <div class="w-full md:w-1/3">
+            <div class="wave-height-indicator relative h-48 rounded-xl overflow-hidden shadow-inner bg-gradient-to-b from-blue-100 to-blue-50">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-600 to-blue-400 opacity-80 transition-all duration-500" 
+                     style="height: calc({{ wave_info.altura_onda * 20 }}%); max-height: 100%;"></div>
+                <div class="absolute inset-x-0 bottom-0 h-3 bg-blue-500 wave-animation opacity-50"></div>
+                <div class="absolute inset-x-0 bottom-1 h-2 bg-blue-400 wave-animation opacity-30" style="animation-delay: -2s;"></div>
             </div>
-            <p class="text-center mt-2 text-3xl font-bold text-blue-800">{{ wave_info.altura_onda }}m</p>
-            <p class="text-center text-blue-600">Altura da Onda</p>
+            <div class="mt-4 text-center">
+                <p class="text-4xl font-bold text-blue-800">{{ wave_info.altura_onda }}m</p>
+                <p class="text-blue-600 font-medium">Altura da Onda</p>
+            </div>
         </div>
         
-        <div class="w-full md:w-2/3 pl-0 md:pl-6">
+        <div class="w-full md:w-2/3">
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-blue-50 p-3 rounded-lg">
-                    <p class="text-sm text-blue-500">Direção</p>
-                    <p class="text-xl font-semibold">{{ wave_info.direcao }}</p>
+                <div class="bg-gradient-to-br from-blue-50 to-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-sm font-medium text-blue-500">Direção</p>
+                    <p class="text-2xl font-bold text-blue-900">{{ wave_info.direcao }}</p>
                 </div>
-                <div class="bg-blue-50 p-3 rounded-lg">
-                    <p class="text-sm text-blue-500">Período</p>
-                    <p class="text-xl font-semibold">{{ wave_info.periodo }}s</p>
+                <div class="bg-gradient-to-br from-blue-50 to-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-sm font-medium text-blue-500">Período</p>
+                    <p class="text-2xl font-bold text-blue-900">{{ wave_info.periodo }}s</p>
                 </div>
-                <div class="bg-blue-50 p-3 rounded-lg">
-                    <p class="text-sm text-blue-500">Temperatura da Água</p>
-                    <p class="text-xl font-semibold">{{ wave_info.temperatura_agua }}°C</p>
+                <div class="bg-gradient-to-br from-blue-50 to-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-sm font-medium text-blue-500">Temperatura da Água</p>
+                    <p class="text-2xl font-bold text-blue-900">{{ wave_info.temperatura_agua }}°C</p>
                 </div>
-                <div class="bg-blue-50 p-3 rounded-lg">
-                    <p class="text-sm text-blue-500">Vento</p>
-                    <p class="text-xl font-semibold">{{ wave_info.vento_velocidade }} km/h</p>
-                    <p class="text-sm">{{ wave_info.vento_direcao }}</p>
+                <div class="bg-gradient-to-br from-blue-50 to-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-sm font-medium text-blue-500">Vento</p>
+                    <p class="text-2xl font-bold text-blue-900">{{ wave_info.vento_velocidade }} km/h</p>
+                    <p class="text-sm font-medium text-blue-700">{{ wave_info.vento_direcao }}</p>
                 </div>
             </div>
             
-            <div class="mt-4 text-right">
-                <p class="text-sm text-gray-500">Atualizado em: {{ wave_info.timestamp.strftime('%d/%m/%Y %H:%M') }}</p>
-                <p class="text-xs text-gray-400">Fonte: {{ wave_info.fonte }}</p>
+            <div class="mt-6 flex items-center justify-between">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center"
+                        hx-get="/ondas/{{ wave_info.bairro }}"
+                        hx-target="#wave-info"
+                        hx-swap="innerHTML"
+                        hx-trigger="click">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Atualizar
+                </button>
+                
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">Atualizado em: {{ wave_info.timestamp.strftime('%d/%m/%Y %H:%M') }}</p>
+                    <div class="flex items-center justify-end mt-1">
+                        <span class="text-xs text-gray-500 mr-2">Fonte:</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium
+                            {% if wave_info.fonte == 'OpenWeatherMap Free' %}
+                                bg-green-100 text-green-800
+                            {% elif wave_info.fonte == 'OpenWeatherMap OneCall' %}
+                                bg-blue-100 text-blue-800
+                            {% elif wave_info.fonte == 'Stormglass' %}
+                                bg-purple-100 text-purple-800
+                            {% else %}
+                                bg-gray-100 text-gray-800
+                            {% endif %}">
+                            {% if wave_info.fonte == "OpenWeatherMap Free" %}
+                                OpenWeatherMap (API Gratuita)
+                            {% elif wave_info.fonte == "OpenWeatherMap OneCall" %}
+                                OpenWeatherMap (OneCall)
+                            {% elif wave_info.fonte == "Stormglass" %}
+                                Stormglass
+                            {% else %}
+                                Simulado
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<div class="mt-4">
-    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            hx-get="/ondas/{{ wave_info.bairro }}"
-            hx-target="#wave-info"
-            hx-swap="innerHTML"
-            hx-trigger="click">
-        Atualizar Dados
-    </button>
 </div>

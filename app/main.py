@@ -29,7 +29,7 @@ else:
 app = FastAPI(
     title="BoasOndas API",
     description="API para coleta de informações de ondas nos bairros do Rio de Janeiro",
-    version="1.0.0"
+    version="1.0.1"
 )
 
 # Mount static files directory
@@ -80,7 +80,7 @@ bairros_coords = {
 bairros_rj = list(bairros_coords.keys())
 
 # Função para obter dados reais de previsão marítima
-def get_real_wave_data(bairro: str):
+def get_openweather_free_data(bairro: str):
     if not OPENWEATHERMAP_API_KEY:
         return None
     
@@ -89,24 +89,14 @@ def get_real_wave_data(bairro: str):
         return None
     
     try:
-        # Obter dados meteorológicos da API OpenWeatherMap
         url = f"https://api.openweathermap.org/data/2.5/weather?lat={coords['lat']}&lon={coords['lon']}&appid={OPENWEATHERMAP_API_KEY}&units=metric"
         response = requests.get(url)
         response.raise_for_status()
         weather_data = response.json()
         
-        # Obter dados de previsão marítima da API OpenWeatherMap
-        # Note: Esta é uma API paga, então estamos simulando alguns dados
-        marine_url = f"https://api.openweathermap.org/data/2.5/onecall?lat={coords['lat']}&lon={coords['lon']}&exclude=minutely,hourly,daily,alerts&appid={OPENWEATHERMAP_API_KEY}&units=metric"
-        marine_response = requests.get(marine_url)
-        marine_response.raise_for_status()
-        marine_data = marine_response.json()
-        
-        # Extrair dados relevantes
-        wind_speed = weather_data.get("wind", {}).get("speed", 0) * 3.6  # Converter m/s para km/h
+        wind_speed = weather_data.get("wind", {}).get("speed", 0) * 3.6
         wind_direction_deg = weather_data.get("wind", {}).get("deg", 0)
         
-        # Converter direção do vento de graus para pontos cardeais
         wind_directions = ["Norte", "Nordeste", "Leste", "Sudeste", "Sul", "Sudoeste", "Oeste", "Noroeste", "Norte"]
         wind_direction = wind_directions[round(wind_direction_deg / 45) % 8]
         
@@ -127,31 +117,14 @@ def get_real_wave_data(bairro: str):
             "temperatura_agua": water_temp,
             "vento_velocidade": round(wind_speed, 1),
             "vento_direcao": wind_direction,
-            "fonte": "OpenWeatherMap"
+            "fonte": "OpenWeatherMap Free"
         }
-    
     except Exception as e:
-        print(f"Erro ao obter dados reais: {e}")
+        print(f"Erro ao obter dados do OpenWeatherMap Free: {e}")
         return None
 
-# Rotas da API
-@app.get("/")
-def read_root():
-    return {"message": "Bem-vindo à API BoasOndas - Informações de ondas do Rio de Janeiro"}
-
-# Update the bairros endpoint to support HTML response
-@app.get("/bairros")
-def get_bairros(request: Request):
-    """Retorna a lista de bairros disponíveis para consulta"""
-    accept = request.headers.get("accept", "")
-    if "text/html" in accept or "application/xhtml+xml" in accept:
-        return templates.TemplateResponse("bairros.html", {"request": request, "bairros": bairros_rj})
-    return bairros_rj
-
-# Update the ondas endpoint to support HTML response
-# Add new function to get Stormglass data
-def get_stormglass_data(bairro: str):
-    if not STORMGLASS_API_KEY:
+def get_openweather_onecall_data(bairro: str):
+    if not OPENWEATHERMAP_API_KEY:
         return None
     
     coords = bairros_coords.get(bairro)
@@ -159,72 +132,154 @@ def get_stormglass_data(bairro: str):
         return None
     
     try:
-        # Stormglass API endpoint
-        params = 'waveHeight,waveDirection,wavePeriod,waterTemperature,windSpeed,windDirection'
-        url = f'https://api.stormglass.io/v2/weather/point?lat={coords["lat"]}&lng={coords["lon"]}&params={params}'
-        
-        headers = {
-            'Authorization': STORMGLASS_API_KEY
-        }
-        
-        response = requests.get(url, headers=headers)
+        url = f"https://api.openweathermap.org/data/3.0/onecall?lat={coords['lat']}&lon={coords['lon']}&exclude=minutely,hourly,daily,alerts&appid={OPENWEATHERMAP_API_KEY}&units=metric"
+        response = requests.get(url)
         response.raise_for_status()
-        data = response.json()
+        weather_data = response.json()
         
-        if 'hours' in data and len(data['hours']) > 0:
-            current_data = data['hours'][0]
-            
-            # Get wave height (convert from meters)
-            wave_height = current_data.get('waveHeight', {}).get('noaa', 0)
-            
-            # Get wave direction (convert from degrees to cardinal)
-            wave_dir_deg = current_data.get('waveDirection', {}).get('noaa', 0)
-            directions = ["Norte", "Nordeste", "Leste", "Sudeste", "Sul", "Sudoeste", "Oeste", "Noroeste"]
-            wave_direction = directions[int((wave_dir_deg + 22.5) % 360) // 45]
-            
-            # Get wave period
-            wave_period = current_data.get('wavePeriod', {}).get('noaa', 0)
-            
-            # Get water temperature
-            water_temp = current_data.get('waterTemperature', {}).get('noaa', 20)
-            
-            # Get wind data
-            wind_speed = current_data.get('windSpeed', {}).get('noaa', 0) * 3.6  # Convert to km/h
-            wind_dir_deg = current_data.get('windDirection', {}).get('noaa', 0)
-            wind_direction = directions[int((wind_dir_deg + 22.5) % 360) // 45]
-            
-            return {
-                "altura_onda": round(wave_height, 1),
-                "direcao": wave_direction,
-                "periodo": round(wave_period, 1),
-                "temperatura_agua": round(water_temp, 1),
-                "vento_velocidade": round(wind_speed, 1),
-                "vento_direcao": wind_direction,
-                "fonte": "Stormglass"
-            }
+        current = weather_data.get("current", {})
+        wind_speed = current.get("wind_speed", 0) * 3.6
+        wind_direction_deg = current.get("wind_deg", 0)
+        
+        wind_directions = ["Norte", "Nordeste", "Leste", "Sudeste", "Sul", "Sudoeste", "Oeste", "Noroeste", "Norte"]
+        wind_direction = wind_directions[round(wind_direction_deg / 45) % 8]
+        
+        return {
+            "altura_onda": round(current.get("wave_height", 0), 1),
+            "direcao": wind_direction,
+            "periodo": round(current.get("wave_period", 8.0), 1),
+            "temperatura_agua": round(current.get("temp", 20), 1),
+            "vento_velocidade": round(wind_speed, 1),
+            "vento_direcao": wind_direction,
+            "fonte": "OpenWeatherMap OneCall"
+        }
     except Exception as e:
-        print(f"Erro ao obter dados do Stormglass: {e}")
+        print(f"Erro ao obter dados do OpenWeatherMap OneCall: {e}")
         return None
 
-# Update the get_wave_info function to try both APIs
 @app.get("/ondas/{bairro}")
-def get_wave_info(bairro: str, request: Request):
-    """Retorna informações de ondas para um bairro específico"""
+def get_wave_info(bairro: str):
     if bairro not in bairros_rj:
         raise HTTPException(status_code=404, detail=f"Bairro {bairro} não encontrado ou não possui praia")
     
     current_time = datetime.now()
     if bairro in wave_database and (current_time - wave_database[bairro].timestamp).seconds < 3600:
-        wave_info = wave_database[bairro]
+        return wave_database[bairro]
+    
+    # Try OpenWeatherMap Free API first
+    real_data = get_openweather_free_data(bairro)
+    
+    # If Free API fails, try OpenWeatherMap OneCall API
+    if not real_data:
+        real_data = get_openweather_onecall_data(bairro)
+    
+    # If OneCall fails, try Stormglass
+    if not real_data:
+        # Define Stormglass API function before using it
+        def get_stormglass_data(bairro: str):
+            if not STORMGLASS_API_KEY:
+                return None
+            
+            coords = bairros_coords.get(bairro)
+            if not coords:
+                return None
+            
+            try:
+                url = f"https://api.stormglass.io/v2/weather/point?lat={coords['lat']}&lng={coords['lon']}&params=waveHeight,waveDirection,wavePeriod,waterTemperature,windSpeed,windDirection"
+                headers = {'Authorization': STORMGLASS_API_KEY}
+                response = requests.get(url, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+                
+                # Get first hour of forecast data
+                current = data.get('hours', [{}])[0]
+                
+                # Convert wave direction to cardinal points
+                wave_dir_deg = current.get('waveDirection', {}).get('noaa', 0)
+                wind_dir_deg = current.get('windDirection', {}).get('noaa', 0)
+                
+                directions = ["Norte", "Nordeste", "Leste", "Sudeste", "Sul", "Sudoeste", "Oeste", "Noroeste"]
+                wave_direction = directions[int((wave_dir_deg + 22.5) % 360) // 45]
+                wind_direction = directions[int((wind_dir_deg + 22.5) % 360) // 45]
+                
+                return {
+                    "altura_onda": round(current.get('waveHeight', {}).get('noaa', 0), 1),
+                    "direcao": wave_direction,
+                    "periodo": round(current.get('wavePeriod', {}).get('noaa', 8.0), 1),
+                    "temperatura_agua": round(current.get('waterTemperature', {}).get('noaa', 20), 1),
+                    "vento_velocidade": round(current.get('windSpeed', {}).get('noaa', 0) * 3.6, 1),
+                    "vento_direcao": wind_direction,
+                    "fonte": "Stormglass"
+                }
+            except Exception as e:
+                print(f"Error getting data from Stormglass: {e}")
+                return None
+                
+        real_data = get_stormglass_data(bairro)
+    
+    if real_data:
+        wave_info = WaveInfo(
+            bairro=bairro,
+            altura_onda=real_data["altura_onda"],
+            direcao=real_data["direcao"],
+            periodo=real_data["periodo"],
+            temperatura_agua=real_data["temperatura_agua"],
+            vento_velocidade=real_data["vento_velocidade"],
+            vento_direcao=real_data["vento_direcao"],
+            timestamp=current_time,
+            fonte=real_data["fonte"]
+        )
     else:
-        # Try OpenWeatherMap API first
-        real_data = get_real_wave_data(bairro)
-        
-        # If OpenWeatherMap fails, try Stormglass
-        if not real_data:
-            real_data = get_stormglass_data(bairro)
-        
-        if real_data:
+        # Fallback to simulation if all APIs fail
+        import random
+        wave_info = WaveInfo(
+            bairro=bairro,
+            altura_onda=round(random.uniform(0.5, 3.0), 1),
+            direcao=random.choice(["Leste", "Sudeste", "Sul", "Sudoeste"]),
+            periodo=round(random.uniform(5.0, 15.0), 1),
+            temperatura_agua=round(random.uniform(18.0, 26.0), 1),
+            vento_velocidade=round(random.uniform(0, 30.0), 1),
+            vento_direcao=random.choice(["Norte", "Nordeste", "Leste", "Sudeste", "Sul", "Sudoeste", "Oeste", "Noroeste"]),
+            timestamp=current_time,
+            fonte="Simulado"
+        )
+    
+    wave_database[bairro] = wave_info
+    return wave_info
+
+@app.get("/ui/ondas/{bairro}", include_in_schema=False)
+async def get_wave_info_ui(bairro: str, request: Request):
+    """HTML endpoint for wave information"""
+    wave_info = get_wave_info(bairro)
+    return templates.TemplateResponse("wave_info.html", {"request": request, "wave_info": wave_info})
+
+@app.get("/ondas", response_model=List[WaveInfo])
+def get_all_wave_info():
+    """Retorna informações de ondas para todos os bairros"""
+    result = []
+    current_time = datetime.now()
+    
+    for bairro in bairros_rj:
+        if bairro in wave_database:
+            result.append(wave_database[bairro])
+        else:
+            # Create wave info without using get_wave_info function
+            real_data = get_openweather_free_data(bairro)
+            if not real_data:
+                real_data = get_openweather_onecall_data(bairro)
+            if not real_data:
+                # Fallback to simulation
+                import random
+                real_data = {
+                    "altura_onda": round(random.uniform(0.5, 3.0), 1),
+                    "direcao": random.choice(["Leste", "Sudeste", "Sul", "Sudoeste"]),
+                    "periodo": round(random.uniform(5.0, 15.0), 1),
+                    "temperatura_agua": round(random.uniform(18.0, 26.0), 1),
+                    "vento_velocidade": round(random.uniform(0, 30.0), 1),
+                    "vento_direcao": random.choice(["Norte", "Nordeste", "Leste", "Sudeste", "Sul", "Sudoeste", "Oeste", "Noroeste"]),
+                    "fonte": "Simulado"
+                }
+            
             wave_info = WaveInfo(
                 bairro=bairro,
                 altura_onda=real_data["altura_onda"],
@@ -236,42 +291,50 @@ def get_wave_info(bairro: str, request: Request):
                 timestamp=current_time,
                 fonte=real_data["fonte"]
             )
-        else:
-            # Fallback to simulation if both APIs fail
-            import random
-            wave_info = WaveInfo(
-                bairro=bairro,
-                altura_onda=round(random.uniform(0.5, 3.0), 1),
-                direcao=random.choice(["Leste", "Sudeste", "Sul", "Sudoeste"]),
-                periodo=round(random.uniform(5.0, 15.0), 1),
-                temperatura_agua=round(random.uniform(18.0, 26.0), 1),
-                vento_velocidade=round(random.uniform(0, 30.0), 1),
-                vento_direcao=random.choice(["Norte", "Nordeste", "Leste", "Sudeste", "Sul", "Sudoeste", "Oeste", "Noroeste"]),
-                timestamp=current_time,
-                fonte="Simulado"
-            )
-        
-        wave_database[bairro] = wave_info
-
-    accept = request.headers.get("accept", "")
-    if "text/html" in accept or "application/xhtml+xml" in accept:
-        return templates.TemplateResponse("wave_info.html", {"request": request, "wave_info": wave_info})
+            wave_database[bairro] = wave_info
+            result.append(wave_info)
     
-    return wave_info
-
-@app.get("/ondas", response_model=List[WaveInfo])
-def get_all_wave_info():
-    """Retorna informações de ondas para todos os bairros"""
-    result = []
-    for bairro in bairros_rj:
-        result.append(get_wave_info(bairro, request=Request(scope={"type": "http"})))
     return result
 
 # Add a new route for the frontend
 @app.get("/ui", include_in_schema=False)
 async def get_ui(request: Request):
     """Serve the frontend UI"""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "bairros": bairros_rj
+    })
+
+@app.get("/bairros")
+def get_bairros(request: Request):
+    """Retorna a lista de bairros disponíveis para consulta"""
+    return bairros_rj
+
+@app.get("/")
+def read_root(request: Request):
+    """Root endpoint with API documentation"""
+    accept = request.headers.get("accept", "")
+    api_info = {
+        "name": "BoasOndas API",
+        "version": "1.0.1",
+        "description": "API para informações de ondas nas praias do Rio de Janeiro",
+        "endpoints": {
+            "/": "Esta página - Informações básicas da API",
+            "/ui": "Interface web para visualização dos dados",
+            "/bairros": "Lista de praias/bairros disponíveis",
+            "/ondas/{bairro}": "Informações detalhadas de ondas para um bairro específico",
+            "/ondas": "Informações de ondas para todos os bairros"
+        },
+        "examples": {
+            "Listar bairros": "/bairros",
+            "Dados de Copacabana": "/ondas/Copacabana",
+            "Interface Web": "/ui"
+        }
+    }
+    
+    if "text/html" in accept or "application/xhtml+xml" in accept:
+        return templates.TemplateResponse("api_info.html", {"request": request, "api_info": api_info})
+    return api_info
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=7000, reload=True)

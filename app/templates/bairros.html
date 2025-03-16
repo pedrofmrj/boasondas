@@ -1,11 +1,26 @@
-{% for bairro in bairros %}
-<div class="p-2">
-    <button class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded shadow-md transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
-            hx-get="/ondas/{{ bairro }}"
-            hx-target="#wave-info"
-            hx-swap="innerHTML"
-            hx-headers='{"Accept": "text/html"}'>
-        {{ bairro }}
-    </button>
+<div class="bg-white/50 backdrop-blur-sm rounded-xl shadow-lg p-6">
+    <h2 class="text-2xl font-bold text-blue-800 mb-6">Praias do Rio de Janeiro</h2>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for bairro in bairros %}
+        <div class="group">
+            <a href="#" 
+               class="block p-4 bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 transform hover:-translate-y-1"
+               hx-get="/ui/ondas/{{ bairro }}"
+               hx-target="#wave-info"
+               hx-swap="innerHTML"
+               hx-push-url="false">
+                <div class="flex items-center justify-between">
+                    <span class="text-lg font-semibold text-blue-700 group-hover:text-blue-900">{{ bairro }}</span>
+                    <svg class="w-5 h-5 text-blue-500 group-hover:text-blue-700 transform group-hover:translate-x-1 transition-transform" 
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
 </div>
-{% endfor %}
+
+<div id="wave-info" class="mt-8"></div>
